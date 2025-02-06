@@ -4,17 +4,9 @@
 
 
 ```
-          +------------------+
-          |      Server      |
-          +------------------+
+
                    |
                    |  (Incoming Request)
-                   v
-          +------------------+
-          |   transformRoute  |
-          +------------------+
-                   |
-                   |  (Route to Controller)
                    v
           +------------------+
           | transformController|
@@ -30,9 +22,9 @@
                    +------------------+
                    |        |        |
                    v        v        v
-          +----------------+ +----------------+ +----------------+
-          |  BillingMapper | | PaymentMapper  | | FulfillmentMapper|
-          +----------------+ +----------------+ +----------------+
+          +----------------+ +----------------+ +----------------+ +----------------+
+          |  Context Mapper | | Intent Mapper  | | Order Mapper| Catalog Mapper |
+          +----------------+ +----------------+ +----------------+ +----------------+
                    |
                    |  (Return Transformed Data)
                    v
@@ -42,9 +34,7 @@
                    |
                    |  (Send Response)
                    v
-          +------------------+
-          |      Client      |
-          +------------------+
+
 ```
 
 ## Data Flow
@@ -91,17 +81,12 @@ The `deepMap(obj: any, parentKey: string = "")` method:
 ### 3. **Handling Specialized Mappers**
 The class maintains a lookup object (`mapperLookup`) that associates keys with specific mappers:
 ```typescript
-const mapperLookup: Record<string, any> = {
-  context: ContextMapper,
-  catalog: CatalogMapper,
-  fulfillment: FulfillmentMapper,
-  fulfillments: FulfillmentMapper,
-  items: ItemMapper,
-  billing: BillingMapper,
-  quote: QuoteMapper,
-  payment: PaymentMapper,
-  tags: TagsMapper,
-};
+      const mapperLookup: Record<string, any> = {
+        context: ContextMapper,
+        intent: IntentMapper,
+        catalog: CatalogMapper,
+        order: OrderMapper,
+      };
 ```
 If an input field matches a key in `mapperLookup`, the corresponding mapper is used to transform the data.
 
@@ -171,7 +156,6 @@ The function `isLeafNode(value: any): boolean` determines if a given value is a 
     }
 }
 ```
-(*Assuming mappings perform uppercase transformations for certain fields*)
 
 ---
 

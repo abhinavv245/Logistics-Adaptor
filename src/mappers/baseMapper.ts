@@ -12,54 +12,54 @@ export class BaseMapper {
     mappings?: Record<string, string | null>,
     deprecatedFields?: string[]
   ) {
-    if (mappings) {
-      this.mappings = mappings;
-    }
-    if (deprecatedFields) {
-      this.deprecatedFields = deprecatedFields;
-    }
+    this.mappings = mappings ?? {};
+    this.deprecatedFields = deprecatedFields ?? [];
   }
 
   transform(input: any): any {
-    return this.deepMap(input, "");
+    return this.deepMap(input);
   }
 
   /**
    * Recursively maps the input object to the target structure.
    */
   protected deepMap(obj: any, parentKey: string = ""): any {
-    if (!_.isObject(obj)) return obj;
+    if (!_.isObject(obj)) return obj; // Base case, return the value if not an object
 
     // Handle arrays correctly
     if (_.isArray(obj)) {
       return obj.map((item) => this.deepMap(item, parentKey));
     }
 
-    let result: Record<string, any> = {};
+    const result: Record<string, any> = {};
+
+    // Define a lookup for modular mappers outside the loop for better performance
+    const mapperLookup: Record<string, any> = {
+      context: ContextMapper,
+      intent: IntentMapper,
+      catalog: CatalogMapper,
+      order: OrderMapper,
+    };
 
     for (const [key, value] of Object.entries(obj)) {
       const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
+      // Skip deprecated fields
       if (this.deprecatedFields.includes(currentKey)) continue;
 
-      let mappedPath = this.mappings[currentKey] || currentKey;
+      // Map current key based on mappings, defaulting to the key if not found
+      const mappedPath = this.mappings[currentKey] ?? currentKey;
       if (mappedPath === null) continue;
 
-      // Define a lookup for modular mappers
-      const mapperLookup: Record<string, any> = {
-        context: ContextMapper,
-        intent: IntentMapper,
-        catalog: CatalogMapper,
-        order: OrderMapper,
-      };
-
-      if (mapperLookup[key] && _.isObject(value)) {
-        _.set(result, mappedPath, mapperLookup[key].transform(value));
+      // Check if we need to apply a modular mapper
+      const mapper = mapperLookup[key];
+      if (mapper && _.isObject(value)) {
+        _.set(result, mappedPath, mapper.transform(value));
       } else if (this.isLeafNode(value)) {
         _.set(result, mappedPath, value);
       } else {
-        const transformedValue = this.deepMap(value, currentKey);
-        result = _.merge(result, transformedValue);
+        // Recursively map nested values
+        _.merge(result, this.deepMap(value, currentKey));
       }
     }
 

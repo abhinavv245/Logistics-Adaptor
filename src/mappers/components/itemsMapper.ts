@@ -6,8 +6,8 @@ export class ItemMapper {
 
     return itemsV1.map((item) => ({
       ...item, // Retain any other properties that are not explicitly transformed
-      fulfillment_ids: item.fulfillment_id ? [item.fulfillment_id] : [], // Convert to array
-      category_ids: item.category_id ? [item.category_id] : [], // Convert to array
+      fulfillment_ids: item.fulfillment_id ? [item.fulfillment_id] : undefined, // Convert to array
+      category_ids: item.category_id ? [item.category_id] : undefined, // Convert to array
       tags: item.tags ? TagsMapper.transform(item.tags) : undefined,
       fulfillment_id: undefined,
       category_id: undefined,

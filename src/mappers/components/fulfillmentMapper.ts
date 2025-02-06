@@ -1,11 +1,12 @@
 import { AddressMapper } from "./addressMapper";
+import { ContactMapper } from "./contactMapper";
 import { TagsMapper } from "./tagsMapper";
 import _, { toUpper } from "lodash";
 
 export class FulfillmentMapper {
   static transform(fulfillmentV1: any): any {
-    if (!fulfillmentV1 || typeof fulfillmentV1 !== "object") return fulfillmentV1;
-
+    if (!fulfillmentV1 || typeof fulfillmentV1 !== "object")
+      return fulfillmentV1;
 
     if (Array.isArray(fulfillmentV1)) {
       return this.transformArray(fulfillmentV1);
@@ -24,6 +25,9 @@ export class FulfillmentMapper {
               ...AddressMapper.transform(start.location.address), // Transform address
             }
           : undefined,
+        contact: start.contact
+          ? ContactMapper.transform(start.contact)
+          : undefined,
       });
     }
 
@@ -37,6 +41,7 @@ export class FulfillmentMapper {
               ...AddressMapper.transform(end.location.address), // Transform address
             }
           : undefined,
+        contact: end.contact ? ContactMapper.transform(end.contact) : undefined,
       });
     }
 
@@ -67,7 +72,7 @@ export class FulfillmentMapper {
     return {
       type,
       stops: fulfillmentV1.start || fulfillmentV1.end ? stops : undefined,
-      ...(tags ? { tags: transformedTags } : {}),
+      ...(tags ? { tags: transformedTags } : undefined),
       ...rest,
       "@ondc/org/ewaybillno": undefined,
       "@ondc/org/ebnexpirydate": undefined,
@@ -78,7 +83,7 @@ export class FulfillmentMapper {
   static transformArray(fulfillmentsV1: any[]): any[] {
     return fulfillmentsV1.map(this.transform.bind(this));
   }
-} 
+}
 
 export const EWAY_MAPPINGS: Record<string, string> = {
   "@ondc/org/ewaybillno": "bill_no",

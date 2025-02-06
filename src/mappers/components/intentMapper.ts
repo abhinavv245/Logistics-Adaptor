@@ -1,8 +1,5 @@
-import { BillingMapper } from "./billingMapper";
 import { FulfillmentMapper } from "./fulfillmentMapper";
-import { ItemMapper } from "./itemsMapper";
 import { PaymentMapper } from "./paymentMapper";
-import { QuoteMapper } from "./quoteMapper";
 import { TagsMapper } from "./tagsMapper";
 
 export class IntentMapper {
