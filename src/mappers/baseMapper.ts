@@ -1,8 +1,6 @@
 import _ from "lodash";
 import { ContextMapper } from "./components/contextMapper";
-import { CatalogMapper } from "./components/catalogMapper";
-import { OrderMapper } from "./components/orderMapper";
-import { IntentMapper } from "./components/intentMapper";
+import { MessageMapper } from "./components/messageMapper";
 
 export class BaseMapper {
   protected mappings: Record<string, string | null> = {};
@@ -36,9 +34,7 @@ export class BaseMapper {
     // Define a lookup for modular mappers outside the loop for better performance
     const mapperLookup: Record<string, any> = {
       context: ContextMapper,
-      intent: IntentMapper,
-      catalog: CatalogMapper,
-      order: OrderMapper,
+      message: MessageMapper,
     };
 
     for (const [key, value] of Object.entries(obj)) {

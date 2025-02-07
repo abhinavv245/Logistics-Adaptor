@@ -10,3 +10,5 @@ export class ContactMapper {
     };
   }
 }
+
+//tags are not present inside contact in 2.0
