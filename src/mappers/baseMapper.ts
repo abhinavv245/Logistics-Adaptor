@@ -4,58 +4,63 @@ import { MessageMapper } from "./components/messageMapper";
 
 export class BaseMapper {
   protected mappings: Record<string, string | null> = {};
+
+  protected reverseMappings: Record<string, string | null> = {};
   protected deprecatedFields: string[] = [];
 
   constructor(
     mappings?: Record<string, string | null>,
     deprecatedFields?: string[]
   ) {
-    this.mappings = mappings ?? {};
-    this.deprecatedFields = deprecatedFields ?? [];
-  }
-
-  transform(input: any): any {
-    return this.deepMap(input);
+    this.mappings = mappings ?? this.mappings;
+    this.reverseMappings = this.invertMappings(this.mappings); // Auto-generate reverse mappings
+    this.deprecatedFields = deprecatedFields ?? this.deprecatedFields;
   }
 
   /**
-   * Recursively maps the input object to the target structure.
+   * Main function that triggers transformation based on version.
    */
-  protected deepMap(obj: any, parentKey: string = ""): any {
-    if (!_.isObject(obj)) return obj; // Base case, return the value if not an object
+  transform(input: any, version: string): any {
+    return this.deepMap(input, version);
+  }
 
-    // Handle arrays correctly
-    if (_.isArray(obj)) {
-      return obj.map((item) => this.deepMap(item, parentKey));
-    }
+  /**
+   * Recursively maps the input object based on the version.
+   * Calls the correct transformation method for modular mappers.
+   */
+  protected deepMap(obj: any, version: string, parentKey: string = ""): any {
+    if (!_.isObject(obj)) return obj;
+    if (_.isArray(obj))
+      return obj.map((item) => this.deepMap(item, version, parentKey));
 
     const result: Record<string, any> = {};
-
-    // Define a lookup for modular mappers outside the loop for better performance
     const mapperLookup: Record<string, any> = {
       context: ContextMapper,
       message: MessageMapper,
     };
 
+    // Determine which mappings to use based on the version
+    const mappings = version === "2.0" ? this.mappings : this.reverseMappings;
+
     for (const [key, value] of Object.entries(obj)) {
       const currentKey = parentKey ? `${parentKey}.${key}` : key;
-
-      // Skip deprecated fields
       if (this.deprecatedFields.includes(currentKey)) continue;
 
-      // Map current key based on mappings, defaulting to the key if not found
-      const mappedPath = this.mappings[currentKey] ?? currentKey;
+      const mappedPath = mappings[currentKey] ?? currentKey;
       if (mappedPath === null) continue;
 
-      // Check if we need to apply a modular mapper
       const mapper = mapperLookup[key];
+
       if (mapper && _.isObject(value)) {
-        _.set(result, mappedPath, mapper.transform(value));
+        if (version === "1.2.5") {
+          _.set(result, mappedPath, mapper.transform(value)); // Use transform for 1.2.5
+        } else {
+          _.set(result, mappedPath, mapper.reverseTransform(value)); // Use reverseTransform for 2.0
+        }
       } else if (this.isLeafNode(value)) {
         _.set(result, mappedPath, value);
       } else {
-        // Recursively map nested values
-        _.merge(result, this.deepMap(value, currentKey));
+        _.merge(result, this.deepMap(value, version, currentKey));
       }
     }
 
@@ -64,5 +69,17 @@ export class BaseMapper {
 
   protected isLeafNode(value: any): boolean {
     return !_.isObject(value) || _.isArray(value);
+  }
+
+  private invertMappings(
+    mappings: Record<string, string | null>
+  ): Record<string, string | null> {
+    const inverted: Record<string, string | null> = {};
+    for (const [key, value] of Object.entries(mappings)) {
+      if (value !== null) {
+        inverted[value] = key;
+      }
+    }
+    return inverted;
   }
 }

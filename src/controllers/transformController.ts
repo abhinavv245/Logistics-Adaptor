@@ -1,25 +1,24 @@
 import { Request, Response } from "express";
-
 import { BaseMapper } from "../mappers/baseMapper";
 
 export const transformController = (req: Request, res: Response) => {
   try {
-    // Create an instance of the BaseMapper
-    const baseMapper = new BaseMapper();
-
-    // Get input data from the request body
     const inputData = req.body;
+    const version =
+      inputData?.context?.version || inputData?.context?.core_version;
 
-    // Transform data using the BaseMapper
-    const transformedData = baseMapper.transform(inputData);
+    if (!version || (version !== "2.0.0" && version !== "1.2.5")) {
+      return res.status(400).json({
+        error: "Invalid or missing version. Supported versions: 1.2.5, 2.0.0",
+      });
+    }
 
-    // Send transformed data as the response
+    const baseMapper = new BaseMapper();
+    const transformedData = baseMapper.transform(inputData, version as string);
+
     res.json(transformedData);
   } catch (error) {
-    // Log any errors that occur during the transformation process
     console.error("Error during transformation:", error);
-
-    // Send the error response
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

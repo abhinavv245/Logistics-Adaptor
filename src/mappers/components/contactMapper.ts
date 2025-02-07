@@ -9,6 +9,15 @@ export class ContactMapper {
       tags: TagsMapper.transform(contactV1.tags),
     };
   }
+
+  static reverseTransform(contactV2: any): any {
+    if (!contactV2 || typeof contactV2 !== "object") return contactV2;
+
+    return {
+      ...contactV2, // Keep all existing properties unchanged
+      tags: TagsMapper.reverseTransform(contactV2.tags),
+    };
+  }
 }
 
 //tags are not present inside contact in 2.0
