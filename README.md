@@ -49,7 +49,7 @@
 ## Mappers
 
 ## **Overview**
-The `BaseMapper` class is an abstract class designed to transform input data based on predefined mappings. It provides a flexible way to restructure objects, handling nested structures, deprecated fields, and modular transformations through specialized mapper classes.
+The `BaseMapper` class is a class designed to transform input data based on predefined mappings. It provides a flexible way to restructure objects, handling nested structures, deprecated fields, and modular transformations through specialized mapper classes.
 
 This class is a core component of a larger mapping system that integrates multiple mappers like `BillingMapper`, `PaymentMapper`, `FulfillmentMapper`, etc., to ensure data transformation across various components.
 
@@ -81,12 +81,10 @@ The `deepMap(obj: any, parentKey: string = "")` method:
 ### 3. **Handling Specialized Mappers**
 The class maintains a lookup object (`mapperLookup`) that associates keys with specific mappers:
 ```typescript
-      const mapperLookup: Record<string, any> = {
-        context: ContextMapper,
-        intent: IntentMapper,
-        catalog: CatalogMapper,
-        order: OrderMapper,
-      };
+    const mapperLookup: Record<string, any> = {
+      context: ContextMapper,
+      message: MessageMapper,
+    };
 ```
 If an input field matches a key in `mapperLookup`, the corresponding mapper is used to transform the data.
 
@@ -99,15 +97,14 @@ The function `isLeafNode(value: any): boolean` determines if a given value is a 
 ---
 
 ## **How It Works**
-1. **A subclass of `BaseMapper` is created**, defining `mappings` for data transformation.
-2. **The `transform(input)` method is called**, initiating recursive transformation via `deepMap()`.
-3. **`deepMap()` iterates through each key-value pair**, checking if:
+1. **The `transform(input)` method is called**, initiating recursive transformation via `deepMap()`.
+2. **`deepMap()` iterates through each key-value pair**, checking if:
    - The key exists in `mappings`.
    - The key is in `deprecatedFields` (if yes, it is skipped).
    - The key corresponds to a specialized mapper (if yes, it is processed using that mapper).
    - The value is a **leaf node** (if yes, it is directly assigned).
    - Otherwise, it **recursively transforms** the nested object.
-4. The final transformed object is returned.
+3. The final transformed object is returned.
 
 ---
 
@@ -159,26 +156,8 @@ The function `isLeafNode(value: any): boolean` determines if a given value is a 
 
 ---
 
-## **Conclusion**
-The `BaseMapper` class provides a powerful and extensible mechanism for structured data transformation. It ensures:
-- **Consistency** across different input formats.
-- **Modularity** by integrating specialized mappers.
-- **Flexibility** to update mappings and deprecated fields easily.
-
-This approach is useful in scenarios where structured data needs to be standardized before further processing or API integration.
 
 
 
-- **Controllers**: 
-  - Manages application logic and handles incoming requests.
-  - Example: `transformController.ts`.
-
-- **Routes**: 
-  - Defines API endpoints and connects requests to controllers.
-  - Example: `transformRoute.ts`.
-
-- **Server**: 
-  - Entry point of the application.
-  - Example: `server.ts`, which sets up the Express server and middleware.
 
 
