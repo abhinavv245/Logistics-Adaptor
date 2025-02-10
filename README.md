@@ -108,23 +108,8 @@ The system supports reverse transformation, where transformed data is reverted t
 #### **1. Reverse Transform Method**
 The `reverseTransform(output: any): any` method:
 - Takes a transformed object.
-- Calls `reverseMap()` to reconstruct the original data format.
+- Calls `reverseTransform()` to reconstruct the original data format.
 
-#### **2. Recursive Reverse Mapping (`reverseMap`)**
-The `reverseMap(obj: any, parentKey: string = "")` method:
-- **Recursively processes objects and arrays** to reverse transformations.
-- **Maps object keys to their original format** based on `reverseMappings`.
-- **Reintroduces fields** that were previously transformed.
-- **Applies specialized mappers** when reversing specific sections of the data.
-
-#### **3. Reverse Mapper Lookup**
-A `reverseMapperLookup` object is used for handling specific mappers in reverse transformation:
-```typescript
-const reverseMapperLookup: Record<string, any> = {
-  context: ReverseContextMapper,
-  message: ReverseMessageMapper,
-};
-```
 
 ### **Example Reverse Transformation**
 #### **Transformed Object (Input to Reverse Transformation)**
