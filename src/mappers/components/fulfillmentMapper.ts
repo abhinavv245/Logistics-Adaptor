@@ -165,6 +165,7 @@ export class FulfillmentMapper {
       start: start
         ? {
             ...start,
+            type: undefined,
             location: start.location
               ? {
                   gps: start.location.gps,
@@ -179,6 +180,7 @@ export class FulfillmentMapper {
       end: end
         ? {
             ...end,
+            type: undefined,
             location: end.location
               ? {
                   gps: end.location.gps,

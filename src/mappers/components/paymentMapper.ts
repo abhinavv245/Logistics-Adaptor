@@ -90,3 +90,5 @@ export const PAYMENT_FIELD_MAPPINGS: Record<string, string> = {
 export const PAYMENT_FIELD_MAPPINGS_REVERSE: Record<string, string> = Object.fromEntries(
   Object.entries(PAYMENT_FIELD_MAPPINGS).map(([key, value]) => [value, key])
 );
+
+// @ondc/org/collection_amount is not currently restored back in 1.2.5 as it does not have a corresponding field
