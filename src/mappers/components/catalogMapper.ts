@@ -1,5 +1,6 @@
 import { ProviderMapper } from "./providerMapper";
 import { DescriptorMapper } from "./descriptorMapper";
+import { TagsMapper } from "./tagsMapper";
 
 export class CatalogMapper {
   static transform(catalogV1: any): any {
@@ -13,6 +14,7 @@ export class CatalogMapper {
       providers: catalogV1["bpp/providers"]
         ? ProviderMapper.transform(catalogV1["bpp/providers"])
         : undefined,
+      tags: catalogV1.tags ? TagsMapper.transform(catalogV1.tags) : undefined,
       "bpp/descriptor": undefined, // Remove old key
       "bpp/providers": undefined, // Remove old key
     };
@@ -28,6 +30,9 @@ export class CatalogMapper {
         : undefined,
       "bpp/providers": catalogV2.providers
         ? ProviderMapper.reverseTransform(catalogV2.providers)
+        : undefined,
+      tags: catalogV2.tags
+        ? TagsMapper.reverseTransform(catalogV2.tags)
         : undefined,
       descriptor: undefined, // Remove new key
       providers: undefined, // Remove new key

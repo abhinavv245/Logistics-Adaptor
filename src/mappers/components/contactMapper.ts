@@ -6,7 +6,7 @@ export class ContactMapper {
 
     return {
       ...contactV1, // Keep all existing properties unchanged
-      tags: TagsMapper.transform(contactV1.tags),
+      tags: contactV1.tags ? TagsMapper.transform(contactV1.tags) : undefined,
     };
   }
 
@@ -15,7 +15,9 @@ export class ContactMapper {
 
     return {
       ...contactV2, // Keep all existing properties unchanged
-      tags: TagsMapper.reverseTransform(contactV2.tags),
+      tags: contactV2.tags
+        ? TagsMapper.reverseTransform(contactV2.tags)
+        : undefined,
     };
   }
 }

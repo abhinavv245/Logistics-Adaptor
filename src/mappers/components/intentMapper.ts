@@ -9,10 +9,12 @@ export class IntentMapper {
 
     return {
       ...intentV1, // Keep all existing properties unchanged
-      fulfillment: FulfillmentMapper.transform(intentV1.fulfillment),
-      tags: TagsMapper.transform(intentV1.tags),
+      fulfillment: intentV1.fulfillment
+        ? FulfillmentMapper.transform(intentV1.fulfillment)
+        : undefined,
+      tags: intentV1.tags ? TagsMapper.transform(intentV1.tags) : undefined,
       payment: intentV1.payment
-        ? PaymentMapper.transform(intentV1.payment) // Convert object to array before transformation
+        ? PaymentMapper.transform(intentV1.payment)
         : undefined,
       "@ondc/org/payload_details": undefined, // Remove old key
     };
@@ -20,15 +22,19 @@ export class IntentMapper {
 
   static reverseTransform(intentV2: any): any {
     if (!intentV2 || typeof intentV2 !== "object") return intentV2;
-  
-    const fulfillment = FulfillmentMapper.reverseTransform(intentV2.fulfillment);
-    const tags = TagsMapper.reverseTransform(intentV2.tags);
+
+    const fulfillment = intentV2.fulfillment
+      ? FulfillmentMapper.reverseTransform(intentV2.fulfillment)
+      : undefined;
+    const tags = intentV2.tags ? TagsMapper.reverseTransform(intentV2.tags) : undefined;
     const payment = intentV2.payment
       ? PaymentMapper.reverseTransform(intentV2.payment)
       : undefined;
-  
-    const payloadDetails = IntentPayloadDetailsMapper.extract(fulfillment?.tags);
-  
+
+    const payloadDetails = fulfillment?.tags
+      ? IntentPayloadDetailsMapper.extract(fulfillment.tags)
+      : undefined;
+
     return {
       ...intentV2,
       fulfillment,

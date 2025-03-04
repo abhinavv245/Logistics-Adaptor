@@ -8,52 +8,44 @@ import { TagsMapper } from "./tagsMapper";
 
 export class OrderMapper {
   static transform(orderV1: any): any {
-    if (!orderV1 || typeof orderV1 !== "object") return orderV1;
+    if (!orderV1 || typeof orderV1 !== "object") return undefined;
 
     return {
-      ...orderV1, // Keep all existing properties unchanged
-      status: orderV1.state ? orderV1.state : undefined, // Map `state` to `status`
-      items: ItemMapper.transform(orderV1.items),
-      fulfillments: FulfillmentMapper.transformArray(orderV1.fulfillments),
-      tags: TagsMapper.transform(orderV1.tags),
-      billing: BillingMapper.transform(orderV1.billing),
-      quote: QuoteMapper.transform(orderV1.quote),
-      payments: orderV1.payment
-        ? [PaymentMapper.transform(orderV1.payment)] // Convert object to array before transformation
-        : undefined,
-      "@ondc/org/linked_order": undefined, // Remove old key
-      state: undefined, // Remove old `status` key
-      payment: undefined, // Remove old `payment` key
+      ...orderV1,
+      status: orderV1.state || undefined,
+      items: orderV1.items ? ItemMapper.transform(orderV1.items) : undefined,
+      fulfillments: orderV1.fulfillments ? FulfillmentMapper.transformArray(orderV1.fulfillments) : undefined,
+      tags: orderV1.tags ? TagsMapper.transform(orderV1.tags) : undefined,
+      billing: orderV1.billing ? BillingMapper.transform(orderV1.billing) : undefined,
+      quote: orderV1.quote ? QuoteMapper.transform(orderV1.quote) : undefined,
+      payments: orderV1.payment ? [PaymentMapper.transform(orderV1.payment)] : undefined,
+      "@ondc/org/linked_order": undefined,
+      state: undefined,
+      payment: undefined,
     };
   }
 
   static reverseTransform(orderV2: any): any {
-    if (!orderV2 || typeof orderV2 !== "object") return orderV2;
+    if (!orderV2 || typeof orderV2 !== "object") return undefined;
 
-    const fulfillments = FulfillmentMapper.reverseTransformArray(
-      orderV2.fulfillments
-    );
-    const billing = BillingMapper.reverseTransform(orderV2.billing);
-    const quote = QuoteMapper.reverseTransform(orderV2.quote);
-    const payments = orderV2.payment
-      ? PaymentMapper.reverseTransform(orderV2.payment)
-      : undefined;
+    const fulfillments = orderV2.fulfillments ? FulfillmentMapper.reverseTransformArray(orderV2.fulfillments) : undefined;
+    const billing = orderV2.billing ? BillingMapper.reverseTransform(orderV2.billing) : undefined;
+    const quote = orderV2.quote ? QuoteMapper.reverseTransform(orderV2.quote) : undefined;
+    const payments = orderV2.payment ? PaymentMapper.reverseTransform(orderV2.payment) : undefined;
 
-    const deliveryFulfillment = fulfillments.find((f) => f.type === "Delivery");
-    const linkedOrder = LinkedOrderMapper.extract(deliveryFulfillment?.tags);
+    const deliveryFulfillment = fulfillments ? fulfillments.find((f) => f.type === "Delivery") : undefined;
+    const linkedOrder = deliveryFulfillment ? LinkedOrderMapper.extract(deliveryFulfillment.tags) : undefined;
 
     return {
       ...orderV2,
-      state: orderV2.status ? orderV2.status : undefined, // Map `status` to `state`
+      state: orderV2.status || undefined,
       fulfillments,
       billing,
       quote,
       payments,
-      tags: orderV2.tags
-        ? TagsMapper.reverseTransform(orderV2.tags)
-        : undefined,
+      tags: orderV2.tags ? TagsMapper.reverseTransform(orderV2.tags) : undefined,
       "@ondc/org/linked_order": linkedOrder,
-      status: undefined
+      status: undefined,
     };
   }
 }

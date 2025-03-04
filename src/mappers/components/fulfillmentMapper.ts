@@ -4,12 +4,12 @@ import { TagsMapper } from "./tagsMapper";
 import _, { toUpper, toLower } from "lodash";
 
 export const EWAY_MAPPINGS: Record<string, string> = {
-  "@ondc/org/ewaybillno": "bill_no",
+  "@ondc/org/ewaybillno": "id",
   "@ondc/org/ebnexpirydate": "expiry_date",
 };
 
 export const AWB_MAPPINGS: Record<string, string> = {
-  "@ondc/org/awb_no": "number",
+  "@ondc/org/awb_no": "id",
 };
 
 export class FulfillmentMapper {
@@ -66,12 +66,12 @@ export class FulfillmentMapper {
       })
       .filter(Boolean); // Remove null values
 
-    if (ewayList.length > 0) {
-      transformedTags.push({
-        descriptor: { code: "EWAY" },
-        list: ewayList,
-      });
-    }
+    // if (ewayList.length > 0) {
+    //   transformedTags.push({
+    //     descriptor: { code: "EBN" },
+    //     list: ewayList,
+    //   });
+    // }
 
     // Create AWB tag only if there are values
     const awbList = Object.entries(AWB_MAPPINGS)
@@ -95,7 +95,9 @@ export class FulfillmentMapper {
       type,
       stops: stops.length > 0 ? stops : undefined,
       tags: transformedTags.length > 0 ? transformedTags : undefined,
+      "@ondc/org/ewaybillno" :undefined,
       "@ondc/org/awb_no": undefined,
+      "@ondc/org/ebnexpirydate":undefined
     };
   }
 
@@ -134,15 +136,15 @@ export class FulfillmentMapper {
 
     // **Filter out EWAY and AWB tags, and extract their values**
     if (Array.isArray(tags)) {
-      transformedTags = transformedTags.filter((tag) => {
-        if (tag?.code === "eway" && Array.isArray(tag.list)) {
+      transformedTags = transformedTags.filter((tag,i) => {
+        if (tag?.code === "ebn" && Array.isArray(tag.list)) {
           tag.list.forEach((item: { code: any; value: any }) => {
             const originalKey = ewayMappingsReverse[item?.code];
-            if (originalKey) {
+            if (originalKey && i==0) {
               ewayValues[originalKey] = item.value;
             }
           });
-          return false; // **Remove EWAY tag from transformedTags**
+          // return false; // **Remove EWAY tag from transformedTags**
         }
 
         if (tag?.code === "awb" && Array.isArray(tag.list)) {

@@ -12,10 +12,10 @@ export class QuoteMapper {
             title: toUpper(item["@ondc/org/title_type"]), // Rename `@ondc/org/title_type` → `title`
             item: {
               id: item["@ondc/org/item_id"] ?? {}, // Move `@ondc/org/item_id` → `item.id`
-              price: item.price ?? undefined, // Keep `price` inside item
-              quantity: item["@ondc/org/item_quantity"]
-                ? { selected: item["@ondc/org/item_quantity"] }
-                : undefined,
+              // price: item.price ?? undefined, // Keep `price` inside item
+              // quantity: item["@ondc/org/item_quantity"]
+              //   ? { selected: item["@ondc/org/item_quantity"] }
+              //   : undefined,
             },
             price: item.price ?? {}, // Keep `price` structure unchanged
           }))
