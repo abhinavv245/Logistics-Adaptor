@@ -4,12 +4,13 @@ export class ContextMapper {
 
     return {
       domain: contextV1.domain || undefined,
-      location: contextV1.location
-        ? {
-            city: { code: contextV1.city || undefined },
-            country: { code: contextV1.country || undefined },
-          }
-        : undefined,
+      location:
+        contextV1.city || contextV1.country
+          ? {
+              city: { code: contextV1.city || undefined },
+              country: { code: contextV1.country || undefined },
+            }
+          : undefined,
       version: "2.0.0",
       ...contextV1,
       core_version: undefined,
@@ -23,8 +24,8 @@ export class ContextMapper {
 
     return {
       ...contextV2,
-      city: contextV2.location?.city?.code || undefined,
-      country: contextV2.location?.country?.code || undefined,
+      city: contextV2.location.city ? contextV2.location?.city?.code : undefined,
+      country: contextV2.location.country? contextV2.location?.country?.code : undefined,
       core_version: "1.2.5", // Map version back to core_version
       location: undefined, // Remove location key
       version: undefined, // Remove version key
