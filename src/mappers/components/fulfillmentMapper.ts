@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "../../utils/constants";
 import { AddressMapper } from "./addressMapper";
 import { ContactMapper } from "./contactMapper";
 import { TagsMapper } from "./tagsMapper";
@@ -30,6 +31,7 @@ export class FulfillmentMapper {
         ...start,
         location: start.location
           ? {
+              id: start.location.id ? start.location.id : undefined,
               gps: start.location.gps,
               ...AddressMapper.transform(start.location.address),
             }
@@ -46,6 +48,7 @@ export class FulfillmentMapper {
         ...end,
         location: end.location
           ? {
+              id: end.location.id ? end.location.id : undefined,
               gps: end.location.gps,
               ...AddressMapper.transform(end.location.address),
             }
@@ -92,12 +95,15 @@ export class FulfillmentMapper {
 
     return {
       ...rest,
-      type,
+      state: fulfillmentV1.state
+        ? { descriptor: { code: toUpper(fulfillmentV1.state.descriptor.code) } }
+        : undefined,
+      type: type ? toUpper(type) : undefined,
       stops: stops.length > 0 ? stops : undefined,
       tags: transformedTags.length > 0 ? transformedTags : undefined,
-      "@ondc/org/ewaybillno" :undefined,
+      "@ondc/org/ewaybillno": undefined,
       "@ondc/org/awb_no": undefined,
-      "@ondc/org/ebnexpirydate":undefined
+      "@ondc/org/ebnexpirydate": undefined,
     };
   }
 
@@ -136,11 +142,11 @@ export class FulfillmentMapper {
 
     // **Filter out EWAY and AWB tags, and extract their values**
     if (Array.isArray(tags)) {
-      transformedTags = transformedTags.filter((tag,i) => {
+      transformedTags = transformedTags.filter((tag, i) => {
         if (tag?.code === "ebn" && Array.isArray(tag.list)) {
           tag.list.forEach((item: { code: any; value: any }) => {
             const originalKey = ewayMappingsReverse[item?.code];
-            if (originalKey && i==0) {
+            if (originalKey && i == 0) {
               ewayValues[originalKey] = item.value;
             }
           });
@@ -163,7 +169,10 @@ export class FulfillmentMapper {
 
     return {
       ...rest,
-      type,
+      type: type ? capitalizeFirstLetter(type) : undefined,
+      state: fulfillmentV2.state
+        ? { descriptor: { code: capitalizeFirstLetter(fulfillmentV2.state.descriptor.code) } }
+        : undefined,
       start: start
         ? {
             ...start,
